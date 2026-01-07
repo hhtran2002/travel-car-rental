@@ -41,9 +41,10 @@ CREATE TABLE `account` (
 --
 
 INSERT INTO `account` (`user_id`, `email`, `password`, `status`, `created_at`, `role_id`) VALUES
-(1, 'honhan3062002@gmail.com', '1', 'active', '2025-09-07 01:49:26', 1),
-(2, 'driver@gmail.com', '2', 'active', '2025-09-07 01:55:17', 2),
-(3, 'a@gmail.com', '3', 'active', '2025-09-07 01:57:04', 3);
+(1,'honhan3062002@gmail.com','$2a$10$eMrZlmf.v11yJk/JLpaL2edzujoYUKCecr0cI2iKBHBuvAu4zzEU6','active','2025-09-07 01:49:26',1),
+(2,'driver@gmail.com','$2a$10$KgitEoNTCLfQtPsTZ8D4ueTkhm8yTsp8W6qwnQyxP0rcJz3fJeYLS','active','2025-09-07 01:55:17',2),
+(3,'a@gmail.com','$2a$10$XeSwG/CILc09ThvSwEIUluV.hzAyp6bwkN3QetVVLYDd5GN5c/EFC','active','2025-09-07 01:57:04',3),
+(4,'n21dccn159@student.ptithcm.edu.vn','$2a$10$OW9//mvyMn3SNqXWX/hgoOf70VPm19bzRpLQcxOSEhQygm3ExBM0u','active');
 
 -- --------------------------------------------------------
 
@@ -245,7 +246,20 @@ INSERT INTO `driver` (`driver_id`, `user_id`, `address`, `exp_years`, `rating`, 
 (1, 2, 'Quận 7, tp. Hồ Chí Minh', 2, NULL, 'available', '123456789', 'B', '2028-09-01');
 
 -- --------------------------------------------------------
+CREATE TABLE `password_reset` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `token` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_user_id` (`user_id`),
+  KEY `idx_token` (`token`),
+  CONSTRAINT `fk_password_reset_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT INTO `password_reset` VALUES (10,4,'$2a$10$3oeoEbZG6sA3ALzLMEezouw9a6ojEw8XOEwFj2D0tsT27F8Ex1wUS','2025-12-27 20:37:18',1,'2025-12-27 20:27:18'),(11,4,'$2a$10$siK3oLUTOhnUQxcIeJ2pCOheA1HEqnvPDQYBeDygnccQlze6al82q','2025-12-27 21:19:57',1,'2025-12-27 21:09:57'),(12,4,'$2a$10$ltYFtSzyQKCvj5onTJ6LROMzuA70sJ3H7yDkBhftbNd1tx444j0t6','2025-12-29 06:30:50',1,'2025-12-29 06:20:50'),(13,4,'$2a$10$lbWkIlDOxjmisajk56epqutQoQzy.yHa2I88Fjne9NNPECBsYfSqu','2025-12-29 09:12:55',1,'2025-12-29 09:02:55'),(14,4,'$2a$10$S.hXADWxL//6VLS849P.ruLxXudkaUbM.Ok7OTi4c1xGeobBYYy3.','2025-12-29 09:41:14',1,'2025-12-29 09:31:14');
 --
 -- Cấu trúc bảng cho bảng `payment`
 --
