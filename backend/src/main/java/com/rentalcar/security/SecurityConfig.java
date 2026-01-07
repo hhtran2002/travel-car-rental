@@ -50,9 +50,12 @@ public class SecurityConfig {
                                 "/api/auth/reset-password",
                                 "/error"
                         ).permitAll()
+                        //customer
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/cars/**").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/drivers/user/**").authenticated()
+                        //admin
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        //driver
                         .requestMatchers("/api/drivers/**").hasRole("DRIVER")
                         .anyRequest().authenticated()
                 )
