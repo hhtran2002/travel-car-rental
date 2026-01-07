@@ -51,7 +51,9 @@ public class SecurityConfig {
                                 "/error"
                         ).permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/cars/**").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/drivers/user/**").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/drivers/**").hasRole("DRIVER")
                         .anyRequest().authenticated()
                 )
 
