@@ -5,7 +5,6 @@ import com.rentalcar.repository.CarRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CarService {
@@ -15,11 +14,50 @@ public class CarService {
         this.carRepository = carRepository;
     }
 
+    //1. Hiển thị danh sách tất cả xe
     public List<Car> getAllCars() {
         return carRepository.findAll();
     }
 
-    public Optional<Car> getCarById(Long id) {
-        return carRepository.findById(id);
+    //2. Tìm kiếm xe
+    public List<Car> searchCars(
+            String modelName,
+            Long brandId,
+            Long typeId,
+            String status
+    ) {
+        List<Car> cars = carRepository.findAll();
+
+        if (status != null && !status.trim().isEmpty()) {
+            cars = carRepository.findByStatus(status);
+        } else {
+            cars = carRepository.findAll();
+        }
+
+        //Lọc theo tên
+        if(modelName != null && !modelName.trim().isEmpty()) //" ","", null bỏ qua
+        {
+            String keyword = modelName.trim().toLowerCase(); //Xóa khoảng trắng, chuyển về chữ thường
+            cars = cars.stream()
+                    .filter(car -> car.getModelName() != null && car.getModelName().toLowerCase().contains(keyword))
+                    .toList();
+
+        }
+
+        // Lọc theo hãng
+        if (brandId != null) {
+            cars = cars.stream()
+                    .filter(car -> brandId.equals(car.getBrandId()))
+                    .toList();
+        }
+
+        // Lọc theo loại
+        if (typeId != null) {
+            cars = cars.stream()
+                    .filter(car -> typeId.equals(car.getTypeId()))
+                    .toList();
+        }
+    return cars;
     }
+
 }

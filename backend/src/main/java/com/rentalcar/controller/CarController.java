@@ -23,11 +23,14 @@ public class CarController {
         return carService.getAllCars();
     }
 
-    // GET /api/cars/{id}
-    @GetMapping("/{id}")
-    public ResponseEntity<Car> getById(@PathVariable Long id) {
-        return carService.getCarById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    @GetMapping("/search")
+    public List<Car> searchCars(
+            @RequestParam(required = false) String modelName,
+            @RequestParam(required = false) Long brandId,
+            @RequestParam(required = false) Long typeId,
+            @RequestParam(required = false) String status
+    ) {
+        return carService.searchCars(modelName, brandId, typeId, status);
     }
+
 }
