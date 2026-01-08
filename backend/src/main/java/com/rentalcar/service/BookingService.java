@@ -49,7 +49,7 @@ public class BookingService {
         return bookingRepository.save(booking);
     }
 
-    // Hàm phụ trợ để cập nhật trạng thái tài xế
+    
     private void updateDriverStatus(Long driverId, String status) {
         if (driverId != null) {
             Driver driver = driverRepository.findById(driverId).orElse(null);
@@ -58,5 +58,18 @@ public class BookingService {
                 driverRepository.save(driver);
             }
         }
+    }
+    
+    public List<Booking> getAllBookings() {
+    
+        return bookingRepository.findAll(org.springframework.data.domain.Sort.by("createdAt").descending());
+    }
+
+
+    public Booking confirmBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+        booking.setStatus("confirmed");
+        return bookingRepository.save(booking);
     }
 }
