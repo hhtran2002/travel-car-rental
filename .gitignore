@@ -7,3 +7,11 @@ build/
 
 # Env
 .env
+
+.vscode/
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.next/
+frontend/.env*
