@@ -60,8 +60,6 @@ public class CarService {
     return cars;
     }
 
-<<<<<<< Updated upstream
-=======
     public Car createCar(Car car) {
         return carRepository.save(car);
     }
@@ -86,5 +84,4 @@ public class CarService {
         }
         carRepository.deleteById(id);
     }
->>>>>>> Stashed changes
 }
