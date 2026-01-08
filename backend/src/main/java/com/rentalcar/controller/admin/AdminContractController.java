@@ -4,6 +4,8 @@ import com.rentalcar.entity.Booking;
 import com.rentalcar.entity.Contract;
 import com.rentalcar.repository.BookingRepository;
 import com.rentalcar.repository.ContractRepository;
+import com.rentalcar.service.DigitalSignatureService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -64,5 +66,13 @@ public class AdminContractController {
         contract.setReturnDate(LocalDateTime.now());
         
         return ResponseEntity.ok(contractRepository.save(contract));
+    }
+    // Inject thêm DigitalSignatureService vào Controller
+    private final DigitalSignatureService signatureService;
+
+    // Thêm API này vào AdminContractController
+    @PostMapping("/{id}/sign")
+    public ResponseEntity<?> signContract(@PathVariable Long id, @RequestParam String signerName) {
+        return ResponseEntity.ok(signatureService.signContract(id, signerName));
     }
 }

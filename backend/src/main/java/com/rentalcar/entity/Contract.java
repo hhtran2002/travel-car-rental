@@ -35,5 +35,8 @@ public class Contract {
     private String status = "pending";
 
     @Column(name = "signed_by", nullable = false)
-    private String signedBy; // Tên Admin hoặc người đại diện ký
+    private String signedBy;
+     // Tên Admin hoặc người đại diện ký
+    @Column(name = "document_url")
+    private String documentUrl; 
 }
