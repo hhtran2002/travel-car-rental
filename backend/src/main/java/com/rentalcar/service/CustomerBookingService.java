@@ -8,15 +8,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.rentalcar.dto.BookingRequest;
 import com.rentalcar.entity.Booking;
+import com.rentalcar.entity.Contract;
 import com.rentalcar.repository.BookingRepository;
+import com.rentalcar.repository.ContractRepository;
 
 @Service
 public class CustomerBookingService {
 
     private final BookingRepository bookingRepository;
+    private final ContractRepository contractRepository;
 
-    public CustomerBookingService(BookingRepository bookingRepository) {
+    public CustomerBookingService(BookingRepository bookingRepository,
+                                  ContractRepository contractRepository) {
         this.bookingRepository = bookingRepository;
+        this.contractRepository = contractRepository;
     }
 
     // ===================== 1. ĐẶT XE =====================
@@ -26,11 +31,10 @@ public class CustomerBookingService {
 
         Booking booking = new Booking();
 
-        // userId lấy từ JWT, KHÔNG lấy từ request
+        // userId lấy từ JWT
         booking.setUserId(userId);
-
         booking.setCarId(request.getCarId());
-        booking.setDriverId(request.getDriverId()); // null nếu tự lái
+        booking.setDriverId(request.getDriverId());
         booking.setDiscountId(request.getDiscountId());
 
         booking.setStartDate(request.getStartDate());
@@ -75,6 +79,7 @@ public class CustomerBookingService {
             throw new RuntimeException("Booking not found or access denied");
         }
 
+        // chỉ cho huỷ khi chưa nhận xe
         if (!"pending".equals(booking.getStatus())) {
             throw new RuntimeException("Cannot cancel this booking");
         }
@@ -93,12 +98,28 @@ public class CustomerBookingService {
                 .findByBookingIdAndUserId(bookingId, userId);
 
         if (booking == null) {
-            throw new RuntimeException("Booking not found or access denied");
+            throw new RuntimeException("Booking not found");
+        }
+
+        if (!"assigned".equals(booking.getTripStatus())) {
+            throw new RuntimeException("Cannot receive car");
         }
 
         booking.setTripStatus("in_progress");
+        bookingRepository.save(booking);
 
-        return bookingRepository.save(booking);
+        // ⭐ TẠO CONTRACT NẾU CHƯA CÓ
+        contractRepository.findByBookingId(bookingId)
+                .orElseGet(() -> {
+                    Contract contract = new Contract();
+                    contract.setBookingId(bookingId);
+                    contract.setCreatedDate(LocalDateTime.now());
+                    contract.setStatus("active");
+                    contract.setSignedBy("customer");
+                    return contractRepository.save(contract);
+                });
+
+        return booking;
     }
 
     // ===================== 6. TRẢ XE =====================
@@ -109,12 +130,35 @@ public class CustomerBookingService {
                 .findByBookingIdAndUserId(bookingId, userId);
 
         if (booking == null) {
-            throw new RuntimeException("Booking not found or access denied");
+            throw new RuntimeException("Booking not found");
+        }
+
+        if (!"in_progress".equals(booking.getTripStatus())) {
+            throw new RuntimeException("Cannot return car");
         }
 
         booking.setTripStatus("completed");
         booking.setStatus("completed");
+        bookingRepository.save(booking);
 
-        return bookingRepository.save(booking);
+        Contract contract = contractRepository.findByBookingId(bookingId)
+                .orElseThrow(() -> new RuntimeException("Contract not found"));
+
+        contract.setReturnDate(LocalDateTime.now());
+
+        long days = java.time.temporal.ChronoUnit.DAYS.between(
+                booking.getStartDate(),
+                booking.getEndDate()
+        );
+        if (days <= 0) days = 1;
+
+        long pricePerDay = 1_000_000;
+        contract.setTotalPrice(days * pricePerDay);
+        contract.setStatus("completed");
+
+        contractRepository.save(contract);
+
+        return booking;
     }
+
 }
