@@ -43,6 +43,7 @@ public class SecurityConfig {
                 )
 
                 .authorizeHttpRequests(auth -> auth
+                        //Public
                         .requestMatchers(
                                 "/api/auth/login",
                                 "/api/auth/register",
@@ -50,12 +51,12 @@ public class SecurityConfig {
                                 "/api/auth/reset-password",
                                 "/error"
                         ).permitAll()
-                        //customer
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/cars/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/drivers/user/**").authenticated()
-                        //admin
+                        //Customer
+                        .requestMatchers("/api/customer/**").hasRole("CUSTOMER")
+                        //Admin
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        //driver
+                        //Driver
                         .requestMatchers("/api/drivers/**").hasRole("DRIVER")
                         .anyRequest().authenticated()
                 )
