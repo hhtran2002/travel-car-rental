@@ -5,7 +5,6 @@ import com.rentalcar.entity.Contract;
 import com.rentalcar.repository.BookingRepository;
 import com.rentalcar.repository.ContractRepository;
 import com.rentalcar.service.DigitalSignatureService;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -20,43 +19,45 @@ public class AdminContractController {
 
     private final ContractRepository contractRepository;
     private final BookingRepository bookingRepository;
+    private final DigitalSignatureService signatureService;
 
-    public AdminContractController(ContractRepository contractRepository, BookingRepository bookingRepository) {
+    public AdminContractController(
+            ContractRepository contractRepository,
+            BookingRepository bookingRepository,
+            DigitalSignatureService signatureService
+    ) {
         this.contractRepository = contractRepository;
         this.bookingRepository = bookingRepository;
+        this.signatureService = signatureService;
     }
 
-    
     @GetMapping
     public List<Contract> getAllContracts() {
         return contractRepository.findAll();
     }
 
-    
     @PostMapping("/create/{bookingId}")
-    public ResponseEntity<?> createContract(@PathVariable Long bookingId, 
-                                            @RequestParam String signedBy) {
-        
+    public ResponseEntity<?> createContract(@PathVariable Long bookingId,
+                                           @RequestParam String signedBy) {
+
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn đặt xe"));
 
-        
         if (contractRepository.findByBookingId(bookingId).isPresent()) {
             return ResponseEntity.badRequest().body("Đơn này đã có hợp đồng rồi!");
         }
 
         Contract contract = new Contract();
         contract.setBookingId(bookingId);
-        contract.setTotalPrice(booking.getTotalPrice()); // Lấy giá từ booking
+        contract.setTotalPrice(booking.getTotalPrice());
         contract.setCreatedDate(LocalDateTime.now());
         contract.setStatus("active");
-        contract.setSignedBy(signedBy); // Tên người ký (Admin nhập vào)
+        contract.setSignedBy(signedBy);
         contract.setDetails("Hợp đồng thuê xe cho đơn #" + bookingId);
 
         return ResponseEntity.ok(contractRepository.save(contract));
     }
 
-    // 3. Kết thúc hợp đồng (Khi khách trả xe)
     @PatchMapping("/{id}/complete")
     public ResponseEntity<Contract> completeContract(@PathVariable Long id) {
         Contract contract = contractRepository.findById(id)
@@ -64,13 +65,10 @@ public class AdminContractController {
 
         contract.setStatus("completed");
         contract.setReturnDate(LocalDateTime.now());
-        
+
         return ResponseEntity.ok(contractRepository.save(contract));
     }
-    // Inject thêm DigitalSignatureService vào Controller
-    private final DigitalSignatureService signatureService;
 
-    // Thêm API này vào AdminContractController
     @PostMapping("/{id}/sign")
     public ResponseEntity<?> signContract(@PathVariable Long id, @RequestParam String signerName) {
         return ResponseEntity.ok(signatureService.signContract(id, signerName));

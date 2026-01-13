@@ -48,6 +48,7 @@ public class BookingService {
 
         return bookingRepository.save(booking);
     }
+    
 
     
     private void updateDriverStatus(Long driverId, String status) {
@@ -72,4 +73,5 @@ public class BookingService {
         booking.setStatus("confirmed");
         return bookingRepository.save(booking);
     }
+    
 }
