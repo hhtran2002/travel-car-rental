@@ -1,14 +1,9 @@
 package com.rentalcar.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 @Entity
 @Table(name = "role")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Role {
 
     @Id
@@ -17,5 +12,27 @@ public class Role {
     private Long roleId;
 
     @Column(name = "role_name", nullable = false)
-    private String roleName; // admin/driver/customer
+    private String roleName; // admin / driver / customer
+
+    // ================= CONSTRUCTOR =================
+    public Role() {
+    }
+
+    // ================= GETTERS =================
+    public Long getRoleId() {
+        return roleId;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
+
+    // ================= SETTERS =================
+    public void setRoleId(Long roleId) {
+        this.roleId = roleId;
+    }
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
 }

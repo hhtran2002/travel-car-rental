@@ -1,13 +1,12 @@
 package com.rentalcar.repository;
 
-import com.rentalcar.entity.Contract;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
+import com.rentalcar.entity.Contract;
 
 @Repository
 public interface ContractRepository extends JpaRepository<Contract, Long> {
-    // Tìm hợp đồng theo mã booking để tránh tạo trùng
+
     Optional<Contract> findByBookingId(Long bookingId);
 }

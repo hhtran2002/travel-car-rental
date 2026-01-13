@@ -1,16 +1,12 @@
 package com.rentalcar.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "account")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+
 public class Account {
 
     @Id
@@ -44,4 +40,66 @@ public class Account {
     private Role role;
 
     public enum Status { active, locked }
+
+    // ================= CONSTRUCTORS =================
+    public Account() {
+    }
+
+    // ================= GETTERS =================
+    public Long getUserId() {
+        return userId;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    // ================= SETTERS =================
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 }

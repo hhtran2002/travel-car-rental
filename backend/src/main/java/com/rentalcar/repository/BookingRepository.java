@@ -9,7 +9,7 @@ import com.rentalcar.entity.Booking;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-
+    //Driver
     // 1. Tìm tất cả chuyến đi được phân công cho tài xế này (Lịch sử chuyến đi)
     // SELECT * FROM booking WHERE driver_id = ?
     List<Booking> findByDriverId(Long driverId);
@@ -21,4 +21,14 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     
     // 3. (Tuỳ chọn) Sắp xếp lịch sử chuyến đi mới nhất lên đầu
     List<Booking> findByDriverIdOrderByStartDateDesc(Long driverId);
+
+    // Customer
+    //1. Lấy tất cả đơn thuê của customer
+    List<Booking> findByUserId(Long userId);
+
+    //2. Sắp xếp từ mới đến cũ
+    List<Booking> findByUserIdOrderByCreatedAtDesc(Long userId);
+
+    //3. Lấy 1 đơn cụ thể
+    Booking findByBookingIdAndUserId(Long bookingId, Long userId);
 }
