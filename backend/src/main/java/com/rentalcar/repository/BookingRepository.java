@@ -1,8 +1,11 @@
 package com.rentalcar.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.rentalcar.entity.Booking;
@@ -31,4 +34,20 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     //3. Lấy 1 đơn cụ thể
     Booking findByBookingIdAndUserId(Long bookingId, Long userId);
+
+    //Check trùng lịch xe
+    // Kiểm tra xem xe đã được đặt trong khoảng thời gian này chưa
+    // Logic trùng lịch:
+    // startA < endB AND endA > startB
+    @Query("""
+        SELECT b FROM Booking b
+        WHERE b.carId = :carId
+          AND b.status <> 'cancelled'
+          AND (:start < b.endDate AND :end > b.startDate)
+    """)
+    List<Booking> findConflictBookings(
+            @Param("carId") Long carId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 }

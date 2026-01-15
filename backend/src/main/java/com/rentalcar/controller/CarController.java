@@ -1,5 +1,6 @@
 package com.rentalcar.controller;
 
+import com.rentalcar.dto.CarDetailDTO;
 import com.rentalcar.entity.Car;
 import com.rentalcar.service.CarService;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,17 @@ public class CarController {
         return carService.getAllCars();
     }
 
+    // GET /api/cars/{id} – CHI TIẾT XE (CÓ NHIỀU ẢNH)
+    @GetMapping("/{id}")
+    public ResponseEntity<CarDetailDTO> getCarDetail(@PathVariable Long id) {
+        CarDetailDTO car = carService.getCarDetail(id);
+        if (car == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(car);
+    }
+
+    // GET /api/cars/search
     @GetMapping("/search")
     public List<Car> searchCars(
             @RequestParam(required = false) String modelName,
@@ -32,5 +44,4 @@ public class CarController {
     ) {
         return carService.searchCars(modelName, brandId, typeId, status);
     }
-
 }

@@ -7,9 +7,6 @@ import java.util.List;
 
 public interface CarRepository extends JpaRepository<Car, Long> {
 
-    //8. Tìm xe theo id
-    List<Car> findByCarId(Long cardId);
-
     //2. Tìm theo tên
     List<Car> findByModelName(String modelName);
 

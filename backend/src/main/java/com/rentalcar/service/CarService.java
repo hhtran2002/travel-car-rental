@@ -1,6 +1,9 @@
 package com.rentalcar.service;
 
+import com.rentalcar.dto.CarDetailDTO;
 import com.rentalcar.entity.Car;
+import com.rentalcar.entity.CarImage;
+import com.rentalcar.repository.CarImageRepository;
 import com.rentalcar.repository.CarRepository;
 import org.springframework.stereotype.Service;
 
@@ -8,25 +11,29 @@ import java.util.List;
 
 @Service
 public class CarService {
-    private final CarRepository carRepository;
 
-    public CarService(CarRepository carRepository) {
+    private final CarRepository carRepository;
+    private final CarImageRepository carImageRepository;
+
+    public CarService(CarRepository carRepository,
+                      CarImageRepository carImageRepository) {
         this.carRepository = carRepository;
+        this.carImageRepository = carImageRepository;
     }
 
-    //1. Hiển thị danh sách tất cả xe
+    // 1. Hiển thị danh sách tất cả xe
     public List<Car> getAllCars() {
         return carRepository.findAll();
     }
 
-    //2. Tìm kiếm xe
+    // 2. Tìm kiếm xe
     public List<Car> searchCars(
             String modelName,
             Long brandId,
             Long typeId,
             String status
     ) {
-        List<Car> cars = carRepository.findAll();
+        List<Car> cars;
 
         if (status != null && !status.trim().isEmpty()) {
             cars = carRepository.findByStatus(status);
@@ -34,30 +41,48 @@ public class CarService {
             cars = carRepository.findAll();
         }
 
-        //Lọc theo tên
-        if(modelName != null && !modelName.trim().isEmpty()) //" ","", null bỏ qua
-        {
-            String keyword = modelName.trim().toLowerCase(); //Xóa khoảng trắng, chuyển về chữ thường
+        if (modelName != null && !modelName.trim().isEmpty()) {
+            String keyword = modelName.trim().toLowerCase();
             cars = cars.stream()
-                    .filter(car -> car.getModelName() != null && car.getModelName().toLowerCase().contains(keyword))
+                    .filter(car -> car.getModelName() != null
+                            && car.getModelName().toLowerCase().contains(keyword))
                     .toList();
-
         }
 
-        // Lọc theo hãng
         if (brandId != null) {
             cars = cars.stream()
                     .filter(car -> brandId.equals(car.getBrandId()))
                     .toList();
         }
 
-        // Lọc theo loại
         if (typeId != null) {
             cars = cars.stream()
                     .filter(car -> typeId.equals(car.getTypeId()))
                     .toList();
         }
-    return cars;
+
+        return cars;
     }
 
+    // 3. Lấy chi tiết xe theo ID (DÙNG DTO)
+    public CarDetailDTO getCarDetail(Long carId) {
+        Car car = carRepository.findById(carId).orElse(null);
+        if (car == null) return null;
+
+        List<String> images = carImageRepository.findByCarId(carId)
+                .stream()
+                .map(CarImage::getLinkImage)
+                .toList();
+
+        CarDetailDTO dto = new CarDetailDTO();
+        dto.setCarId(car.getCarId());
+        dto.setModelName(car.getModelName());
+        dto.setYear(car.getYear());
+        dto.setStatus(car.getStatus());
+        dto.setRating(car.getRating());
+        dto.setMainImage(car.getMainImage());
+        dto.setImages(images);
+
+        return dto;
+    }
 }
