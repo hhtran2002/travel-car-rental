@@ -1,41 +1,25 @@
-// frontend/src/pages/driver/DriverDashboard.jsx
 import { useState, useEffect } from "react";
-// import { driverApi } from "../../api/driverApi"; // Bỏ comment khi có API
+import { driverApi } from "../../api/driverApi"; // Bỏ comment khi có API
 import TripMap from "../../component/TripMap"; // <--- Import Map
 
 const DriverDashboard = () => {
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // Giả lập data CÓ TỌA ĐỘ (Lat, Lng)
-  const mockTrips = [
-    {
-      id: 1,
-      customerName: "Nguyễn Văn A",
-      route: "Sân Bay TSN - Bitexco Quận 1",
-      date: "2024-01-10",
-      status: "IN_PROGRESS", // Đang chạy để hiện bản đồ
-      price: "2.500.000",
-      // Tọa độ ví dụ (Sân bay -> Quận 1)
-      startPoint: [10.818463, 106.658825],
-      endPoint: [10.771595, 106.704758],
-    },
-    {
-      id: 2,
-      customerName: "Trần Thị B",
-      route: "Quận 7 - Landmark 81",
-      date: "2024-01-09",
-      status: "ASSIGNED",
-      price: "500.000",
-      startPoint: [10.7328, 106.721],
-      endPoint: [10.795, 106.722],
-    },
-  ];
-
+  const [err, setErr] = useState("");
+  const loadTrips = async () => {
+    try {
+      setLoading(true);
+      setErr("");
+      const data = await driverApi.getMyTrips(); // GET /api/driver/trips
+      setTrips(Array.isArray(data) ? data : data?.data ?? []);
+    } catch (e) {
+      setErr("Không tải được chuyến đi. Kiểm tra BE/CORS/token.");
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    // loadTrips();
-    setTrips(mockTrips);
-    setLoading(false);
+    loadTrips();
   }, []);
 
   const handleStatusChange = async (id, newStatus) => {
@@ -43,14 +27,18 @@ const DriverDashboard = () => {
       !window.confirm(`Bạn chắc chắn muốn đổi trạng thái thành ${newStatus}?`)
     )
       return;
-    setTrips((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t))
-    );
+
+    try {
+      await driverApi.updateTripStatus(id, newStatus); // PUT /api/driver/trips/{id}/status
+      await loadTrips(); // reload cho chắc
+    } catch (e) {
+      alert("Đổi trạng thái thất bại. Kiểm tra API BE.");
+    }
   };
 
   if (loading)
     return <div className="text-[#00FF00] text-center mt-10">Đang tải...</div>;
-
+  if (err) return <div className="text-red-500 text-center mt-10">{err}</div>;
   const newRequests = trips.filter((t) => t.status === "ASSIGNED");
   const activeTrips = trips.filter(
     (t) => t.status === "IN_PROGRESS" || t.status === "CONFIRMED"

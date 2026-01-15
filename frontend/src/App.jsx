@@ -6,12 +6,10 @@ import Footer from "./component/Footer";
 
 // Pages
 import Home from "./pages/Home";
-import OwnerRegisterGuide from "./pages/OwnerRegisterGuide";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
-import AdminCustomers from "./pages/AdminCustomers";
 import NotFound from "./pages/NotFound";
 
 // Car pages
@@ -28,16 +26,29 @@ import AdminLayout from "./layouts/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminCarList from "./pages/admin/AdminCarList";
 import AdminBookingList from "./pages/admin/AdminBookingList";
+import AdminKycRequests from "./pages/admin/AdminKycRequest";
+import AdminKycReview from "./pages/admin/AdminKycReview";
+import AdminDocumentScan from "./pages/admin/AdminDocumentScan";
+import AdminEsignDemo from "./pages/admin/AdminEsignDemo";
+
+//customers
+import CustomerLayout from "./layouts/CustomerLayout";
+import CustomerTrip from "./pages/customers/CustomerTrip";
 
 export default function App() {
   const location = useLocation();
 
+  const isAdminOrDriver =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/driver");
+
   return (
     <>
-      <Navbar />
+      {/* ✅ Navbar chỉ hiện ở public */}
+      {!isAdminOrDriver && <Navbar />}
 
-      <Routes location={location}>
-        {/* Public routes */}
+      <Routes>
+        {/* ===== PUBLIC ===== */}
         <Route path="/" element={<Home />} />
         <Route path="/cars" element={<CarList />} />
         <Route path="/cars/:id" element={<CarDetail />} />
@@ -46,7 +57,7 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Driver routes */}
+        {/* ===== DRIVER ===== */}
         <Route
           path="/driver"
           element={
@@ -57,9 +68,10 @@ export default function App() {
         >
           <Route index element={<DriverDashboard />} />
           <Route path="history" element={<TripHistory />} />
+          <Route path="*" element={<Navigate to="/driver" replace />} />
         </Route>
 
-        {/* Admin routes */}
+        {/* ===== ADMIN ===== */}
         <Route
           path="/admin"
           element={
@@ -71,33 +83,32 @@ export default function App() {
           <Route index element={<AdminDashboard />} />
           <Route path="cars" element={<AdminCarList />} />
           <Route path="bookings" element={<AdminBookingList />} />
+          <Route path="kyc" element={<AdminKycRequests />} />
+          <Route path="kyc/:id" element={<AdminKycReview />} />
+          <Route path="documents" element={<AdminDocumentScan />} />
+          <Route path="esign" element={<AdminEsignDemo />} />
 
           <Route
             path="customers"
-            element={
-              <div className="text-gray-500 dark:text-white">
-                Quản lý Khách hàng (Coming Soon)
-              </div>
-            }
+            element={<div className="text-gray-500">Coming Soon</div>}
           />
-
           <Route
             path="contracts"
-            element={
-              <div className="text-gray-500 dark:text-white">
-                Quản lý Hợp đồng (Coming Soon)
-              </div>
-            }
+            element={<div className="text-gray-500">Coming Soon</div>}
           />
 
-          <Route path="*" element={<Navigate to="/admin" />} />
+          <Route path="*" element={<Navigate to="/admin" replace />} />
+        </Route>
+        <Route path="/customer" element={<CustomerLayout />}>
+          <Route path="trip" element={<CustomerTrip />} />
         </Route>
 
-        {/* 404 */}
+        {/* ===== 404 ===== */}
         <Route path="*" element={<NotFound />} />
       </Routes>
 
-      <Footer />
+      {/* ✅ Footer chỉ hiện ở public */}
+      {!isAdminOrDriver && <Footer />}
     </>
   );
 }
