@@ -130,11 +130,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleException(Exception ex) {
+        
+        ex.printStackTrace(); 
+
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                 Map.of(
                         "timestamp", LocalDateTime.now().toString(),
                         "status", 500,
-                        "message", "Lỗi hệ thống"
+                        // SỬA DÒNG NÀY: Trả về message thật của lỗi
+                        "message", ex.getMessage() != null ? ex.getMessage() : "Lỗi hệ thống không xác định"
                 )
         );
     }

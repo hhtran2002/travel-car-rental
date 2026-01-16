@@ -63,7 +63,9 @@ public class BookingService {
 
         return booking;
     }
+    
 
+<<<<<<< HEAD
     // ADMIN XEM TẤT CẢ BOOKING
     public List<Booking> getAllBookings() {
         return bookingRepo.findAll();
@@ -186,4 +188,30 @@ public class BookingService {
         return bookingRepo.save(booking);
     }
 
+=======
+    
+    private void updateDriverStatus(Long driverId, String status) {
+        if (driverId != null) {
+            Driver driver = driverRepository.findById(driverId).orElse(null);
+            if (driver != null) {
+                driver.setStatus(status);
+                driverRepository.save(driver);
+            }
+        }
+    }
+    
+    public List<Booking> getAllBookings() {
+    
+        return bookingRepository.findAll(org.springframework.data.domain.Sort.by("createdAt").descending());
+    }
+
+
+    public Booking confirmBooking(Long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+        booking.setStatus("confirmed");
+        return bookingRepository.save(booking);
+    }
+    
+>>>>>>> origin/minh
 }
