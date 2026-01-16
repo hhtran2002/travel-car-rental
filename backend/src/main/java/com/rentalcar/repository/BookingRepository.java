@@ -12,32 +12,44 @@ import com.rentalcar.entity.Booking;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    //Driver
-    // 1. Tìm tất cả chuyến đi được phân công cho tài xế này (Lịch sử chuyến đi)
-    // SELECT * FROM booking WHERE driver_id = ?
+
+    /* ================= DRIVER ================= */
+
+    // Lịch sử chuyến đi của tài xế
     List<Booking> findByDriverId(Long driverId);
 
-    // 2. Tìm các chuyến đi theo trạng thái cụ thể của tài xế 
-    // (Ví dụ: Lấy các chuyến đang chạy "in_progress" để hiển thị lên màn hình chính)
-    // SELECT * FROM booking WHERE driver_id = ? AND trip_status = ?
+    // Các chuyến theo tripStatus (assigned / in_progress / completed / cancelled)
     List<Booking> findByDriverIdAndTripStatus(Long driverId, String tripStatus);
-    
-    // 3. (Tuỳ chọn) Sắp xếp lịch sử chuyến đi mới nhất lên đầu
+
+    // Lịch sử chuyến đi – sắp xếp mới nhất
     List<Booking> findByDriverIdOrderByStartDateDesc(Long driverId);
 
-    // Customer
-    //1. Lấy tất cả đơn thuê của customer
+    // Dashboard – các chuyến đã confirmed
+    List<Booking> findByDriverIdAndStatusOrderByCreatedAtDesc(Long driverId, String status);
+
+    // Dashboard – các chuyến đang chạy
+    List<Booking> findByDriverIdAndTripStatusOrderByCreatedAtDesc(Long driverId, String tripStatus);
+
+    // Dashboard – các booking đang chờ tài xế nhận
+    List<Booking> findByStatusAndDriverIdIsNullOrderByCreatedAtDesc(String status);
+
+
+    /* ================= CUSTOMER ================= */
+
+    // Danh sách booking của customer
     List<Booking> findByUserId(Long userId);
 
-    //2. Sắp xếp từ mới đến cũ
+    // Danh sách booking (mới → cũ)
     List<Booking> findByUserIdOrderByCreatedAtDesc(Long userId);
 
-    //3. Lấy 1 đơn cụ thể
+    // Chi tiết booking của customer
     Booking findByBookingIdAndUserId(Long bookingId, Long userId);
 
-    //Check trùng lịch xe
-    // Kiểm tra xem xe đã được đặt trong khoảng thời gian này chưa
-    // Logic trùng lịch:
+
+    /* ================= ADMIN / SYSTEM ================= */
+
+    // Kiểm tra trùng lịch xe
+    // Logic trùng:
     // startA < endB AND endA > startB
     @Query("""
         SELECT b FROM Booking b

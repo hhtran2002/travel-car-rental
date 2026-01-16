@@ -26,31 +26,32 @@ public class DriverBookingController {
                 .map(BookingResponse::fromEntity)
                 .toList();
     }
-
-    // ================= DRIVER NHẬN CHUYẾN =================
-    // PUT: /api/driver/bookings/{bookingId}/accept?driverId=1
-    @PutMapping("/{bookingId}/accept")
-    public ResponseEntity<BookingResponse> acceptBooking(
-            @PathVariable Long bookingId,
-            @RequestParam Long driverId
-    ) {
-        return ResponseEntity.ok(
-                BookingResponse.fromEntity(
-                        bookingService.driverAcceptBooking(bookingId, driverId)
-                )
-        );
-    }
-
-    // ================= DRIVER HOÀN THÀNH CHUYẾN =================
-    // PUT: /api/driver/bookings/{bookingId}/complete
-    @PutMapping("/{bookingId}/complete")
-    public ResponseEntity<BookingResponse> completeTrip(
-            @PathVariable Long bookingId
-    ) {
-        return ResponseEntity.ok(
-                BookingResponse.fromEntity(
-                        bookingService.completeTrip(bookingId)
-                )
-        );
-    }
 }
+
+//    // ================= DRIVER NHẬN CHUYẾN =================
+//    // PUT: /api/driver/bookings/{bookingId}/accept?driverId=1
+//    @PutMapping("/{bookingId}/accept")
+//    public ResponseEntity<BookingResponse> acceptBooking(
+//            @PathVariable Long bookingId,
+//            @RequestParam Long driverId
+//    ) {
+//        return ResponseEntity.ok(
+//                BookingResponse.fromEntity(
+//                        bookingService.driverAcceptBooking(bookingId, driverId)
+//                )
+//        );
+//    }
+
+//    // ================= DRIVER HOÀN THÀNH CHUYẾN =================
+//    // PUT: /api/driver/bookings/{bookingId}/complete
+//    @PutMapping("/{bookingId}/complete")
+//    public ResponseEntity<BookingResponse> completeTrip(
+//            @PathVariable Long bookingId
+//    ) {
+//        return ResponseEntity.ok(
+//                BookingResponse.fromEntity(
+//                        bookingService.completeTrip(bookingId)
+//                )
+//        );
+//    }
+//}
