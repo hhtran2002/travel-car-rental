@@ -12,6 +12,10 @@ public class RegisterRequest {
 
     @NotBlank(message = "Email không được trống")
     @Email(message = "Email không hợp lệ")
+    @Pattern(
+            regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
+            message = "Email không đúng định dạng"
+    )
     private String email;
 
     @NotBlank(message = "Mật khẩu không được trống")
@@ -19,8 +23,8 @@ public class RegisterRequest {
     private String password;
 
     @Pattern(
-            regexp = "(^$|\\d{10,11})",
-            message = "Số điện thoại phải gồm 10-11 chữ số"
+            regexp = "(^$|0\\d{9,10})",
+            message = "Số điện thoại phải bắt đầu bằng 0 và gồm 10-11 chữ số"
     )
     private String phone;
 

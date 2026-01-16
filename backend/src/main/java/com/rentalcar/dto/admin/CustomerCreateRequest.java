@@ -1,6 +1,6 @@
 package com.rentalcar.dto.admin;
 
-
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
@@ -14,12 +14,18 @@ public class CustomerCreateRequest {
 
     @NotBlank(message = "Email không được trống")
     @Email(message = "Email không hợp lệ")
+    @Pattern(
+            regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
+            message = "Email không đúng định dạng"
+    )
     private String email;
 
     @NotBlank(message = "Mật khẩu không được trống")
     @Size(min = 6, message = "Mật khẩu tối thiểu 6 ký tự")
     private String password;
 
+
+    @Pattern(regexp = "^0\\d{9,10}$", message = "Số điện thoại không hợp lệ")
     private String phone;
 
     @Past(message = "Ngày sinh phải là ngày trong quá khứ")

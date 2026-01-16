@@ -42,7 +42,7 @@ public class AdminCustomerController {
         return adminCustomerService.createCustomer(request);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public CustomerResponse update(@PathVariable Long id,
                                    @Valid @RequestBody(required = false) CustomerUpdateRequest request) {
         if (request == null) throw new IllegalArgumentException("Body không được trống");
