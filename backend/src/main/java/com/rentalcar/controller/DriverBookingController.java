@@ -18,6 +18,7 @@ public class DriverBookingController {
     }
 
     // ================= DRIVER XEM DANH SÁCH CHUYẾN =================
+    // GET: /api/driver/bookings/{driverId}
     @GetMapping("/{driverId}")
     public List<BookingResponse> getDriverBookings(@PathVariable Long driverId) {
         return bookingService.getDriverBookings(driverId)
@@ -27,6 +28,7 @@ public class DriverBookingController {
     }
 
     // ================= DRIVER NHẬN CHUYẾN =================
+    // PUT: /api/driver/bookings/{bookingId}/accept?driverId=1
     @PutMapping("/{bookingId}/accept")
     public ResponseEntity<BookingResponse> acceptBooking(
             @PathVariable Long bookingId,
@@ -40,6 +42,7 @@ public class DriverBookingController {
     }
 
     // ================= DRIVER HOÀN THÀNH CHUYẾN =================
+    // PUT: /api/driver/bookings/{bookingId}/complete
     @PutMapping("/{bookingId}/complete")
     public ResponseEntity<BookingResponse> completeTrip(
             @PathVariable Long bookingId

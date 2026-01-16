@@ -18,13 +18,25 @@ public class AdminBookingController {
         this.bookingService = bookingService;
     }
 
-    // ================= ADMIN XEM TẤT CẢ ĐƠN =================
+    // ================= ADMIN XEM TẤT CẢ BOOKING =================
     @GetMapping
     public List<BookingResponse> getAllBookings() {
         return bookingService.getAllBookings()
                 .stream()
                 .map(BookingResponse::fromEntity)
                 .toList();
+    }
+
+    // ================= ADMIN XÁC NHẬN BOOKING =================
+    @PutMapping("/{bookingId}/confirm")
+    public ResponseEntity<BookingResponse> confirmBooking(
+            @PathVariable Long bookingId
+    ) {
+        return ResponseEntity.ok(
+                BookingResponse.fromEntity(
+                        bookingService.confirmBooking(bookingId)
+                )
+        );
     }
 
     // ================= ADMIN PHÂN TÀI XẾ =================
@@ -40,7 +52,31 @@ public class AdminBookingController {
         );
     }
 
-    // ================= ADMIN HỦY ĐƠN =================
+    // ================= ADMIN NHẬN XE =================
+    @PutMapping("/{bookingId}/pickup")
+    public ResponseEntity<BookingResponse> pickupCar(
+            @PathVariable Long bookingId
+    ) {
+        return ResponseEntity.ok(
+                BookingResponse.fromEntity(
+                        bookingService.pickupCar(bookingId)
+                )
+        );
+    }
+
+    // ================= ADMIN TRẢ XE =================
+    @PutMapping("/{bookingId}/return")
+    public ResponseEntity<BookingResponse> returnCar(
+            @PathVariable Long bookingId
+    ) {
+        return ResponseEntity.ok(
+                BookingResponse.fromEntity(
+                        bookingService.returnCar(bookingId)
+                )
+        );
+    }
+
+    // ================= ADMIN HỦY BOOKING =================
     @PutMapping("/{bookingId}/cancel")
     public ResponseEntity<BookingResponse> cancelBooking(
             @PathVariable Long bookingId

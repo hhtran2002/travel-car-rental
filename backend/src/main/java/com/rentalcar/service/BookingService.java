@@ -1,71 +1,10 @@
-//package com.rentalcar.service;
-//
-//import java.util.List;
-//
-//import org.springframework.stereotype.Service;
-//import org.springframework.transaction.annotation.Transactional;
-//
-//import com.rentalcar.entity.Booking;
-//import com.rentalcar.entity.Driver;
-//import com.rentalcar.repository.BookingRepository;
-//import com.rentalcar.repository.DriverRepository;
-//
-//@Service
-//public class BookingService {
-//
-//    private final BookingRepository bookingRepository;
-//    private final DriverRepository driverRepository;
-//
-//    public BookingService(BookingRepository bookingRepository, DriverRepository driverRepository) {
-//        this.bookingRepository = bookingRepository;
-//        this.driverRepository = driverRepository;
-//    }
-//
-//    // 1. Xem lịch sử chuyến đi của tài xế
-//    public List<Booking> getDriverHistory(Long driverId) {
-//        // Có thể dùng hàm findByDriverIdOrderByStartDateDesc nếu đã tạo trong Repository
-//        return bookingRepository.findByDriverId(driverId);
-//    }
-//
-//    // 2. Cập nhật trạng thái chuyến đi (Xử lý logic nghiệp vụ phức tạp)
-//    @Transactional // Đảm bảo tính toàn vẹn dữ liệu (cập nhật cả 2 bảng hoặc không bảng nào)
-//    public Booking updateTripStatus(Long bookingId, String newStatus) {
-//        Booking booking = bookingRepository.findById(bookingId)
-//                .orElseThrow(() -> new RuntimeException("Booking not found with id " + bookingId));
-//
-//        // Cập nhật trạng thái chuyến đi
-//        booking.setTripStatus(newStatus);
-//
-//        // LOGIC TỰ ĐỘNG CẬP NHẬT TRẠNG THÁI TÀI XẾ
-//        // Nếu chuyến đi bắt đầu -> Tài xế bận
-//        if ("in_progress".equalsIgnoreCase(newStatus)) {
-//            updateDriverStatus(booking.getDriverId(), "busy");
-//        }
-//        // Nếu chuyến đi kết thúc hoặc hủy -> Tài xế rảnh
-//        else if ("completed".equalsIgnoreCase(newStatus) || "cancelled".equalsIgnoreCase(newStatus)) {
-//            updateDriverStatus(booking.getDriverId(), "available");
-//        }
-//
-//        return bookingRepository.save(booking);
-//    }
-//
-//    // Hàm phụ trợ để cập nhật trạng thái tài xế
-//    private void updateDriverStatus(Long driverId, String status) {
-//        if (driverId != null) {
-//            Driver driver = driverRepository.findById(driverId).orElse(null);
-//            if (driver != null) {
-//                driver.setStatus(status);
-//                driverRepository.save(driver);
-//            }
-//        }
-//    }
-//}
-
 package com.rentalcar.service;
 
 import com.rentalcar.dto.CreateBookingRequest;
 import com.rentalcar.entity.Booking;
+import com.rentalcar.entity.Driver;
 import com.rentalcar.repository.BookingRepository;
+import com.rentalcar.repository.DriverRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -74,39 +13,26 @@ import java.util.List;
 @Service
 public class BookingService {
 
-    private final BookingRepository bookingRepository;
+    private final BookingRepository bookingRepo;
+    private final DriverRepository driverRepo;
+    private final ContractService contractService;
 
-    public BookingService(BookingRepository bookingRepository) {
-        this.bookingRepository = bookingRepository;
+    public BookingService(
+            BookingRepository bookingRepo,
+            DriverRepository driverRepo,
+            ContractService contractService
+    ) {
+        this.bookingRepo = bookingRepo;
+        this.driverRepo = driverRepo;
+        this.contractService = contractService;
     }
 
-    // =====================================================
-    // CUSTOMER
-    // =====================================================
-
-    // 1. Customer đặt xe
+    // ================= CUSTOMER TẠO BOOKING =================
     public Booking createBookingFromRequest(CreateBookingRequest req) {
-
-        // Validate thời gian
-        if (req.getEndDate().isBefore(req.getStartDate())) {
-            throw new RuntimeException("Ngày trả phải sau ngày nhận");
-        }
-
-        // Check trùng lịch xe
-        List<Booking> conflicts = bookingRepository.findConflictBookings(
-                req.getCarId(),
-                req.getStartDate(),
-                req.getEndDate()
-        );
-
-        if (!conflicts.isEmpty()) {
-            throw new RuntimeException("Xe đã được đặt trong khoảng thời gian này");
-        }
 
         Booking booking = new Booking();
         booking.setUserId(req.getUserId());
         booking.setCarId(req.getCarId());
-        booking.setDriverId(req.getDriverId());
         booking.setDiscountId(req.getDiscountId());
         booking.setStartDate(req.getStartDate());
         booking.setEndDate(req.getEndDate());
@@ -118,77 +44,146 @@ public class BookingService {
         booking.setTripStatus("assigned");
         booking.setCreatedAt(LocalDateTime.now());
 
-        return bookingRepository.save(booking);
+        return bookingRepo.save(booking);
     }
 
-    // 2. Customer xem danh sách đơn
+    // ================= CUSTOMER XEM DANH SÁCH ĐƠN =================
     public List<Booking> getCustomerBookings(Long userId) {
-        return bookingRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        return bookingRepo.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
-    // 3. Customer xem chi tiết đơn
+    // ================= CUSTOMER XEM CHI TIẾT ĐƠN =================
     public Booking getCustomerBookingDetail(Long bookingId, Long userId) {
-        Booking booking = bookingRepository.findByBookingIdAndUserId(bookingId, userId);
+
+        Booking booking = bookingRepo.findByBookingIdAndUserId(bookingId, userId);
+
         if (booking == null) {
-            throw new RuntimeException("Không tìm thấy đơn đặt xe");
+            throw new RuntimeException("Không tìm thấy booking của user");
         }
+
         return booking;
     }
 
-    // =====================================================
-    // DRIVER
-    // =====================================================
-
-    public List<Booking> getDriverBookings(Long driverId) {
-        return bookingRepository.findByDriverIdOrderByStartDateDesc(driverId);
-    }
-
-    public Booking driverAcceptBooking(Long bookingId, Long driverId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
-
-        booking.setDriverId(driverId);
-        booking.setStatus("confirmed");
-        booking.setTripStatus("in_progress");
-
-        return bookingRepository.save(booking);
-    }
-
-    public Booking completeTrip(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
-
-        booking.setStatus("completed");
-        booking.setTripStatus("completed");
-
-        return bookingRepository.save(booking);
-    }
-
-    // =====================================================
-    // ADMIN
-    // =====================================================
-
+    // ADMIN XEM TẤT CẢ BOOKING
     public List<Booking> getAllBookings() {
-        return bookingRepository.findAll();
+        return bookingRepo.findAll();
     }
 
-    public Booking assignDriver(Long bookingId, Long driverId) {
-        Booking booking = bookingRepository.findById(bookingId)
+    // ================= ADMIN CONFIRM BOOKING =================
+    public Booking confirmBooking(Long bookingId) {
+
+        Booking booking = bookingRepo.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+
+        if (!"pending".equals(booking.getStatus())) {
+            throw new RuntimeException("Booking không ở trạng thái pending");
+        }
+
+        booking.setStatus("confirmed");
+        bookingRepo.save(booking);
+
+        // Tạo hợp đồng
+        contractService.createContractForBooking(booking);
+
+        return booking;
+    }
+
+    // ================= ADMIN PHÂN TÀI XẾ =================
+    public Booking assignDriver(Long bookingId, Long driverId) {
+
+        Booking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+
+        // Validate driver tồn tại
+        driverRepo.findById(driverId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài xế"));
 
         booking.setDriverId(driverId);
         booking.setTripStatus("assigned");
 
-        return bookingRepository.save(booking);
+        return bookingRepo.save(booking);
     }
 
+    // ================= DRIVER XEM DANH SÁCH CHUYẾN =================
+    public List<Booking> getDriverBookings(Long driverId) {
+        return bookingRepo.findByDriverId(driverId);
+    }
+
+    // ================= DRIVER NHẬN CHUYẾN =================
+    public Booking driverAcceptBooking(Long bookingId, Long driverId) {
+
+        Booking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+
+        if (booking.getDriverId() != null) {
+            throw new RuntimeException("Chuyến đi đã có tài xế");
+        }
+
+        booking.setDriverId(driverId);
+        booking.setTripStatus("assigned");
+
+        return bookingRepo.save(booking);
+    }
+
+    // ================= DRIVER NHẬN XE =================
+    public Booking pickupCar(Long bookingId) {
+
+        Booking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+
+        if (!"confirmed".equals(booking.getStatus())) {
+            throw new RuntimeException("Booking chưa được xác nhận");
+        }
+
+        if (!"assigned".equals(booking.getTripStatus())) {
+            throw new RuntimeException("Không thể nhận xe");
+        }
+
+        booking.setTripStatus("in_progress");
+        return bookingRepo.save(booking);
+    }
+
+    // ================= DRIVER HOÀN THÀNH CHUYẾN =================
+    public Booking completeTrip(Long bookingId) {
+
+        Booking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+
+        if (!"in_progress".equals(booking.getTripStatus())) {
+            throw new RuntimeException("Chuyến đi chưa bắt đầu");
+        }
+
+        booking.setTripStatus("completed");
+        booking.setStatus("completed");
+
+        return bookingRepo.save(booking);
+    }
+
+    // ================= ADMIN / CUSTOMER HỦY BOOKING =================
     public Booking cancelBooking(Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId)
+
+        Booking booking = bookingRepo.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
 
         booking.setStatus("cancelled");
         booking.setTripStatus("cancelled");
 
-        return bookingRepository.save(booking);
+        return bookingRepo.save(booking);
     }
+    // ================= ADMIN TRẢ XE =================
+    public Booking returnCar(Long bookingId) {
+
+        Booking booking = bookingRepo.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+
+        if (!"in_progress".equals(booking.getTripStatus())) {
+            throw new RuntimeException("Chưa nhận xe thì không thể trả");
+        }
+
+        booking.setTripStatus("completed");
+        booking.setStatus("completed");
+
+        return bookingRepo.save(booking);
+    }
+
 }
