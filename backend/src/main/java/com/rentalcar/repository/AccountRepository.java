@@ -32,4 +32,5 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
           )
         """)
     Page<Account> searchCustomers(@Param("keyword") String keyword, Pageable pageable);
+    
 }

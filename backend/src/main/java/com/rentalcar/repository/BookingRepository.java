@@ -44,6 +44,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     // Chi tiết booking của customer
     Booking findByBookingIdAndUserId(Long bookingId, Long userId);
+<<<<<<< HEAD
 
 
     /* ================= ADMIN / SYSTEM ================= */
@@ -63,3 +64,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("end") LocalDateTime end
     );
 }
+=======
+    // Dashboard - Requests: pending + chưa có driver
+    List<Booking> findByStatusAndDriverIdIsNullOrderByCreatedAtDesc(String status);
+
+    // Dashboard - Confirmed: driver đã nhận
+    List<Booking> findByDriverIdAndStatusOrderByCreatedAtDesc(Long driverId, String status);
+
+    // Dashboard - In progress: đang chạy
+    List<Booking> findByDriverIdAndTripStatusOrderByCreatedAtDesc(Long driverId, String tripStatus);
+
+}
+>>>>>>> origin/minh

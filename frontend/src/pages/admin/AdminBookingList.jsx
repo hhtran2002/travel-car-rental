@@ -30,7 +30,7 @@ const AdminBookingList = () => {
     try {
       await adminApi.confirmBooking(id);
       alert("Đã duyệt đơn thành công!");
-      fetchBookings(); // Reload lại bảng
+      fetchBookings();
     } catch (error) {
       alert(
         "Lỗi duyệt đơn: " +

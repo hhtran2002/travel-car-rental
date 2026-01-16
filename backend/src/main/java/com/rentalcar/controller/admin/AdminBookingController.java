@@ -20,7 +20,11 @@ public class AdminBookingController {
         this.bookingService = bookingService;
     }
 
+<<<<<<< HEAD
     // ================= ADMIN XEM TẤT CẢ BOOKING =================
+=======
+    // ADMIN chỉ xem & quản lý booking
+>>>>>>> origin/minh
     @GetMapping
     public List<BookingResponse> getAllBookings() {
         return bookingService.getAllBookings()
@@ -28,6 +32,7 @@ public class AdminBookingController {
                 .map(BookingResponse::fromEntity)
                 .toList();
     }
+<<<<<<< HEAD
 
     // ================= ADMIN XÁC NHẬN BOOKING =================
     @PutMapping("/{bookingId}/confirm")
@@ -89,4 +94,6 @@ public class AdminBookingController {
                 )
         );
     }
+=======
+>>>>>>> origin/minh
 }
