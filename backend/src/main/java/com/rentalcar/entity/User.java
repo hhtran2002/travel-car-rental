@@ -90,4 +90,5 @@ public class User {
     public void setAccount(Account account) {
         this.account = account;
     }
+    
 }

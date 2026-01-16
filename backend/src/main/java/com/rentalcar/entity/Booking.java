@@ -17,7 +17,7 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "booking_id")
     private Long bookingId;
-
+    
     // Để đơn giản (giống Car.java), mình dùng ID. 
     // Nếu muốn hiển thị tên Khách/Xe, bạn có thể @ManyToOne sau này.
     @Column(name = "user_id", nullable = false)

@@ -61,4 +61,25 @@ public class DriverController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    // NEW: Dashboard trips
+    @GetMapping("/{id}/dashboard-trips")
+    public ResponseEntity<?> getDashboardTrips(@PathVariable("id") Long driverId) {
+        return ResponseEntity.ok(bookingService.getDriverDashboardTrips(driverId));
+    }
+
+    // NEW: Driver decision confirm/reject
+    @PatchMapping("/{driverId}/bookings/{bookingId}/decision")
+    public ResponseEntity<?> driverDecision(
+            @PathVariable Long driverId,
+            @PathVariable Long bookingId,
+            @RequestParam String decision
+    ) {
+        try {
+            Booking updated = bookingService.driverDecision(driverId, bookingId, decision);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

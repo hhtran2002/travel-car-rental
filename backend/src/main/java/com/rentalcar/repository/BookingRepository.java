@@ -31,4 +31,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     //3. Lấy 1 đơn cụ thể
     Booking findByBookingIdAndUserId(Long bookingId, Long userId);
+    // Dashboard - Requests: pending + chưa có driver
+    List<Booking> findByStatusAndDriverIdIsNullOrderByCreatedAtDesc(String status);
+
+    // Dashboard - Confirmed: driver đã nhận
+    List<Booking> findByDriverIdAndStatusOrderByCreatedAtDesc(Long driverId, String status);
+
+    // Dashboard - In progress: đang chạy
+    List<Booking> findByDriverIdAndTripStatusOrderByCreatedAtDesc(Long driverId, String tripStatus);
+
 }
