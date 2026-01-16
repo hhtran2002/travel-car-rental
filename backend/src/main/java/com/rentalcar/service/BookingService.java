@@ -136,7 +136,7 @@ public class BookingService {
         Map<String, List<Booking>> res = new HashMap<>();
 
         res.put("requests",
-                bookingRepository.findByStatusAndDriverIdIsNullOrderByCreatedAtDesc(STATUS_PENDING));
+               bookingRepository.findByDriverIdAndStatusOrderByCreatedAtDesc(driverId, STATUS_PENDING));
 
         res.put("confirmed",
                 bookingRepository.findByDriverIdAndStatusOrderByCreatedAtDesc(driverId, STATUS_CONFIRMED));
