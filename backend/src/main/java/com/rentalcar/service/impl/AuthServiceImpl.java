@@ -44,7 +44,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponse login(LoginRequest req) {
-        Account acc = accountRepo.findByEmail(req.getEmail())
+        String email = req.getEmail().trim().toLowerCase();
+        Account acc = accountRepo.findByEmail(email)
                 .orElseThrow(() -> new UnauthorizedException("Sai email hoặc mật khẩu"));
 
         if (acc.getStatus() == Account.Status.locked) {
@@ -68,12 +69,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public RegisterResponse registerCustomer(RegisterRequest req) {
-        if (accountRepo.findByEmail(req.getEmail()).isPresent()) {
+        String email = req.getEmail().trim().toLowerCase();
+        if (accountRepo.existsByEmail(email)) {
             throw new ConflictException("Email đã tồn tại");
         }
 
+
         User user = new User();
-        user.setFullName(req.getFullName());
+        user.setFullName(req.getFullName().trim());
         String phone = (req.getPhone() == null || req.getPhone().isBlank())
                 ? null
                 : req.getPhone().trim();
@@ -93,7 +96,7 @@ public class AuthServiceImpl implements AuthService {
 
         Account acc = new Account();
         acc.setUser(user);
-        acc.setEmail(req.getEmail());
+        acc.setEmail(email);
         acc.setPassword(encoder.encode(req.getPassword()));
         acc.setStatus(Account.Status.active);
         acc.setCreatedAt(LocalDateTime.now());
@@ -111,7 +114,9 @@ public class AuthServiceImpl implements AuthService {
         String commonMsg = "Nếu email tồn tại, hệ thống đã gửi OTP đặt lại mật khẩu";
         int expiresMinutes = 10;
 
-        Account acc = accountRepo.findByEmail(req.getEmail()).orElse(null);
+        String email = req.getEmail().trim().toLowerCase();
+        Account acc = accountRepo.findByEmail(email).orElse(null);
+
 
         // chống dò email
         if (acc == null) {
@@ -145,7 +150,8 @@ public class AuthServiceImpl implements AuthService {
         passwordResetRepo.save(pr);
 
         // gửi OTP qua email
-        emailService.sendResetOtp(acc.getEmail(), otp, expiresMinutes);
+        emailService.sendResetOtp(email, otp, expiresMinutes);
+
 
         // ✅ Trả message thôi (không trả OTP ra API để an toàn)
         return new ForgotPasswordResponse(commonMsg, null, expiresMinutes);
@@ -155,7 +161,8 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public String resetPassword(ResetPasswordRequest req) {
 
-        Account acc = accountRepo.findByEmail(req.getEmail())
+        String email = req.getEmail().trim().toLowerCase();
+        Account acc = accountRepo.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Email không tồn tại"));
 
         // ✅ lấy OTP mới nhất (kể cả used=true)
@@ -176,6 +183,11 @@ public class AuthServiceImpl implements AuthService {
         // ✅ 3) sai OTP
         if (!encoder.matches(req.getToken(), pr.getToken())) {
             throw new IllegalArgumentException("OTP không hợp lệ");
+        }
+
+        // sau khi check OTP hợp lệ (trước khi setPassword)
+        if (encoder.matches(req.getNewPassword(), acc.getPassword())) {
+            throw new ConflictException("Mật khẩu mới phải khác mật khẩu cũ");
         }
 
         // đổi mật khẩu

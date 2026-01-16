@@ -2,22 +2,31 @@ package com.rentalcar.dto.admin;
 
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
-
+import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDate;
 
 public class CustomerUpdateRequest {
     private String fullName;
+
+    @Pattern(regexp="^$|^0\\d{9,10}$", message="Số điện thoại không hợp lệ")
     private String phone;
 
     @Past(message = "Ngày sinh phải là ngày trong quá khứ")
     private LocalDate dob;
+    @Pattern(
+            regexp = "^(?i)(?:$|nam|nữ|male|female)$",
+            message = "Giới tính chỉ nhận 'nam' hoặc 'nữ' (hoặc male/female)"
+    )
     private String gender;
     private String avatar;
 
     // optional: admin khoá/mở tài khoản
     // chỉ nhận active hoặc locked (null thì bỏ qua)
-    @Pattern(regexp = "^(active|locked)$", message = "Status chỉ nhận 'active' hoặc 'locked'")
+    @Pattern(
+            regexp = "^(?i)(active|locked)$",
+            message = "Status chỉ nhận 'active' hoặc 'locked'"
+    )
     private String status;
 
     public String getFullName() {

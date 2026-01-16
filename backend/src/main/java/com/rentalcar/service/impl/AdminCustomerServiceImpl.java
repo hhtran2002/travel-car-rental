@@ -86,6 +86,11 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
             throw new ConflictException("Email đã tồn tại");
         }
 
+        // Check phone trùng
+        if (userRepository.existsByPhone(request.getPhone())) {
+            throw new ConflictException("Số điện thoại đã tồn tại");
+        }
+
         // 2) Lấy role customer
         Role customerRole = roleRepository.findByRoleName("customer")
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy role customer"));
@@ -117,6 +122,15 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
     @Override
     @Transactional
     public CustomerResponse updateCustomer(Long id, CustomerUpdateRequest request) {
+        if (request.getFullName() == null &&
+                request.getPhone() == null &&
+                request.getDob() == null &&
+                request.getGender() == null &&
+                request.getAvatar() == null &&
+                request.getStatus() == null) {
+            throw new IllegalArgumentException("Không có dữ liệu cập nhật");
+        }
+
 
         Account a = accountRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Không tìm thấy khách hàng"));
@@ -129,19 +143,52 @@ public class AdminCustomerServiceImpl implements AdminCustomerService {
             throw new NotFoundException("Không tìm thấy thông tin user của khách hàng");
         }
 
-        // Update các field của user nếu client gửi lên (null thì giữ nguyên)
-        if (request.getFullName() != null) u.setFullName(request.getFullName());
-        if (request.getPhone() != null) u.setPhone(request.getPhone());
-        if (request.getDob() != null) u.setDob(request.getDob());
-        if (request.getGender() != null) u.setGender(request.getGender());
-        if (request.getAvatar() != null) u.setAvatar(request.getAvatar());
 
-        // Update status account nếu có (DTO đã @Pattern active|locked)
+        // fullName: nếu có gửi -> trim -> rỗng thì báo lỗi
+        if (request.getFullName() != null) {
+            String name = request.getFullName().trim();
+            if (name.isEmpty()) throw new IllegalArgumentException("Họ tên không được trống");
+            u.setFullName(name);
+        }
+
+        // phone: nếu có gửi -> trim -> rỗng lỗi, trùng lỗi 409
+        if (request.getPhone() != null) {
+            String phone = request.getPhone().trim();
+            if (phone.isEmpty()) throw new IllegalArgumentException("Số điện thoại không được trống");
+
+            // ✅ check trùng loại trừ chính nó
+            if (userRepository.existsByPhoneAndUserIdNot(phone, u.getUserId())) {
+                throw new ConflictException("Số điện thoại đã tồn tại");
+            }
+            u.setPhone(phone);
+        }
+
+        // dob: nếu gửi lên thì update (Past validate đã bắt)
+        if (request.getDob() != null) {
+            u.setDob(request.getDob());
+        }
+
+        // gender: nếu gửi "" thì xóa, còn không thì set (Pattern sẽ validate "nam|nữ")
+        if (request.getGender() != null) {
+            String g = request.getGender().trim().toLowerCase();
+            if (g.isEmpty()) u.setGender(null);
+            else u.setGender(g);
+        }
+
+       // avatar: "" => xóa
+        if (request.getAvatar() != null) {
+            String av = request.getAvatar().trim();
+            u.setAvatar(av.isEmpty() ? null : av);
+        }
+
+        // status: nếu có gửi -> không cho rỗng
         if (request.getStatus() != null) {
             String st = request.getStatus().trim().toLowerCase();
-            // valueOf cần đúng enum name, enum của bạn là active/locked -> ok
+            if (st.isEmpty()) throw new IllegalArgumentException("Status không được trống");
             a.setStatus(Account.Status.valueOf(st));
+
         }
+
 
         // save cho rõ ràng
         userRepository.save(u);
