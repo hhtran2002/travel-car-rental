@@ -1,4 +1,4 @@
-package com.rentalcar.controller;
+package com.rentalcar.controller.driver;
 
 import com.rentalcar.entity.Booking;
 import com.rentalcar.entity.Driver;
