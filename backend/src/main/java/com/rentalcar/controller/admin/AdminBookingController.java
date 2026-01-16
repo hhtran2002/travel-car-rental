@@ -20,11 +20,7 @@ public class AdminBookingController {
         this.bookingService = bookingService;
     }
 
-<<<<<<< HEAD
     // ================= ADMIN XEM TẤT CẢ BOOKING =================
-=======
-    // ADMIN chỉ xem & quản lý booking
->>>>>>> origin/minh
     @GetMapping
     public List<BookingResponse> getAllBookings() {
         return bookingService.getAllBookings()
@@ -32,7 +28,6 @@ public class AdminBookingController {
                 .map(BookingResponse::fromEntity)
                 .toList();
     }
-<<<<<<< HEAD
 
     // ================= ADMIN XÁC NHẬN BOOKING =================
     @PutMapping("/{bookingId}/confirm")
@@ -54,14 +49,14 @@ public class AdminBookingController {
     ) {
         return ResponseEntity.ok(
                 BookingResponse.fromEntity(
-                        bookingService.assignDriver(bookingId, req.driverId)
+                        bookingService.assignDriver(bookingId, req.getDriverId())
                 )
         );
     }
 
-    // ================= ADMIN NHẬN XE (START TRIP) =================
-    @PutMapping("/{bookingId}/pickup")
-    public ResponseEntity<BookingResponse> pickupCar(
+    // ================= ADMIN START TRIP (NHẬN XE) =================
+    @PutMapping("/{bookingId}/start")
+    public ResponseEntity<BookingResponse> startTrip(
             @PathVariable Long bookingId
     ) {
         return ResponseEntity.ok(
@@ -71,14 +66,14 @@ public class AdminBookingController {
         );
     }
 
-    // ================= ADMIN TRẢ XE =================
-    @PutMapping("/{bookingId}/return")
-    public ResponseEntity<BookingResponse> returnCar(
+    // ================= ADMIN COMPLETE TRIP (TRẢ XE) =================
+    @PutMapping("/{bookingId}/complete")
+    public ResponseEntity<BookingResponse> completeTrip(
             @PathVariable Long bookingId
     ) {
         return ResponseEntity.ok(
                 BookingResponse.fromEntity(
-                        bookingService.returnCar(bookingId)
+                        bookingService.updateTripStatus(bookingId, "completed")
                 )
         );
     }
@@ -94,6 +89,4 @@ public class AdminBookingController {
                 )
         );
     }
-=======
->>>>>>> origin/minh
 }

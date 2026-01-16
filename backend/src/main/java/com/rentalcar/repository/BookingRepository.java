@@ -1,36 +1,35 @@
 package com.rentalcar.repository;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
+import com.rentalcar.entity.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.rentalcar.entity.Booking;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     /* ================= DRIVER ================= */
 
-    // Lịch sử chuyến đi của tài xế
+    // Tất cả booking của tài xế
     List<Booking> findByDriverId(Long driverId);
 
-    // Các chuyến theo tripStatus (assigned / in_progress / completed / cancelled)
+    // Booking theo tripStatus
     List<Booking> findByDriverIdAndTripStatus(Long driverId, String tripStatus);
 
-    // Lịch sử chuyến đi – sắp xếp mới nhất
+    // Lịch sử chuyến đi (mới → cũ)
     List<Booking> findByDriverIdOrderByStartDateDesc(Long driverId);
 
-    // Dashboard – các chuyến đã confirmed
+    // Dashboard – đã confirmed
     List<Booking> findByDriverIdAndStatusOrderByCreatedAtDesc(Long driverId, String status);
 
-    // Dashboard – các chuyến đang chạy
+    // Dashboard – đang chạy
     List<Booking> findByDriverIdAndTripStatusOrderByCreatedAtDesc(Long driverId, String tripStatus);
 
-    // Dashboard – các booking đang chờ tài xế nhận
+    // Dashboard – booking đang chờ tài xế nhận
     List<Booking> findByStatusAndDriverIdIsNullOrderByCreatedAtDesc(String status);
 
 
@@ -44,14 +43,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     // Chi tiết booking của customer
     Booking findByBookingIdAndUserId(Long bookingId, Long userId);
-<<<<<<< HEAD
 
 
     /* ================= ADMIN / SYSTEM ================= */
 
-    // Kiểm tra trùng lịch xe
-    // Logic trùng:
-    // startA < endB AND endA > startB
+    /**
+     * Kiểm tra trùng lịch xe
+     * Logic trùng:
+     * startA < endB AND endA > startB
+     */
     @Query("""
         SELECT b FROM Booking b
         WHERE b.carId = :carId
@@ -64,15 +64,3 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             @Param("end") LocalDateTime end
     );
 }
-=======
-    // Dashboard - Requests: pending + chưa có driver
-    List<Booking> findByStatusAndDriverIdIsNullOrderByCreatedAtDesc(String status);
-
-    // Dashboard - Confirmed: driver đã nhận
-    List<Booking> findByDriverIdAndStatusOrderByCreatedAtDesc(Long driverId, String status);
-
-    // Dashboard - In progress: đang chạy
-    List<Booking> findByDriverIdAndTripStatusOrderByCreatedAtDesc(Long driverId, String tripStatus);
-
-}
->>>>>>> origin/minh

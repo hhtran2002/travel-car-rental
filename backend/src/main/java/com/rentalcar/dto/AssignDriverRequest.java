@@ -1,5 +1,14 @@
 package com.rentalcar.dto;
 
 public class AssignDriverRequest {
-    public Long driverId;
+
+    private Long driverId;
+
+    public Long getDriverId() {
+        return driverId;
+    }
+
+    public void setDriverId(Long driverId) {
+        this.driverId = driverId;
+    }
 }
