@@ -1,37 +1,47 @@
 package com.rentalcar.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rentalcar.service.FptAiService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.rentalcar.service.OcrResultService;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ocr")
 public class OcrController {
 
     private final FptAiService fptAiService;
-    private final OcrResultService ocrResultService;
+    private final ObjectMapper mapper;
 
-    public OcrController(FptAiService fptAiService, OcrResultService ocrResultService) {
+    public OcrController(FptAiService fptAiService, ObjectMapper mapper) {
         this.fptAiService = fptAiService;
-        this.ocrResultService = ocrResultService;
+        this.mapper = mapper;
     }
 
     @PostMapping("/vehicle-registration")
-    public ResponseEntity<?> scanRegistration(@RequestParam("image") MultipartFile file) {
-        try {
-            String resultJson = fptAiService.scanVehicleRegistration(file);
+    public ResponseEntity<?> ocrVehicleRegistration(@RequestPart("image") MultipartFile image) throws Exception {
+        String raw = fptAiService.ocrVehicleRegistration(image);
 
-            // ✅ lưu DB
-            var saved = ocrResultService.saveFromFptJson("DLR", resultJson); // docType sửa theo bạn
+        // raw là JSON string -> parse ra Map
+        Map<String, Object> parsedRaw = mapper.readValue(raw, new TypeReference<>() {});
+        Map<String, Object> data = (Map<String, Object>) parsedRaw.getOrDefault("data", new LinkedHashMap<>());
 
-            // ✅ trả về record đã lưu (hoặc trả rawJson tùy)
-            return ResponseEntity.ok(saved);
+        // Map field chuẩn hoá (tuỳ raw thực tế)
+        Map<String, Object> parsed = new LinkedHashMap<>();
+        parsed.put("plate", data.getOrDefault("plate", ""));
+        parsed.put("owner", data.getOrDefault("owner", ""));
+        parsed.put("frameNo", data.getOrDefault("frame_no", data.getOrDefault("frameNo", "")));
+        parsed.put("engineNo", data.getOrDefault("engine_no", data.getOrDefault("engineNo", "")));
 
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Lỗi nhận dạng: " + e.getMessage());
-        }
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("ok", true);
+        res.put("raw", raw);
+        res.put("parsed", parsed);
+
+        return ResponseEntity.ok(res);
     }
 }

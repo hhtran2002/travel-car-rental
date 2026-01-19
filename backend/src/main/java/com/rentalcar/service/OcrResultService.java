@@ -26,7 +26,11 @@ public class OcrResultService {
         OcrResult r = new OcrResult();
         r.setDocType(docType);
         r.setRawJson(rawJson);
-        r.setErrorCode(parsed.getErrorCode());
+
+        // ✅ FIX: Integer -> String
+        Integer ec = parsed.getErrorCode();
+        r.setErrorCode(ec == null ? null : String.valueOf(ec));
+
         r.setErrorMessage(parsed.getErrorMessage());
         r.setCreatedAt(LocalDateTime.now());
 

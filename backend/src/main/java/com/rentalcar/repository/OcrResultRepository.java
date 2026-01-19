@@ -1,4 +1,3 @@
-// src/main/java/com/rentalcar/repository/OcrResultRepository.java
 package com.rentalcar.repository;
 
 import com.rentalcar.entity.OcrResult;
