@@ -1,0 +1,235 @@
+/* =========================
+   HOME PAGE - LANDING
+   ========================= */
+
+.homePage {
+    width: 100%;
+    min-height: 100vh;
+    background: #ffffff;
+    color: #111827;
+}
+
+/* Container */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 16px 64px;
+    box-sizing: border-box;
+}
+
+/* =========================
+   HERO SECTION
+   ========================= */
+
+.hero {
+    position: relative;
+    margin-bottom: 72px;
+}
+
+.heroBanner {
+    position: relative;
+    height: 520px;
+    border-radius: 20px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+}
+
+.heroOverlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom right,
+        rgba(0, 0, 0, 0.55),
+        rgba(0, 0, 0, 0.25)
+    );
+}
+
+.heroContent {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    padding: 80px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 720px;
+}
+
+/* ===== TEXT ===== */
+
+.heroTitle {
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 1.2;
+    color: #ffffff;
+    margin-bottom: 18px;
+}
+
+.heroLine {
+    width: 80px;
+    height: 4px;
+    background: #16a34a;
+    border-radius: 999px;
+    margin-bottom: 18px;
+}
+
+.heroSub {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #e5e7eb;
+    max-width: 560px;
+}
+
+/* =========================
+   HERO ACTIONS
+   ========================= */
+
+.heroActions {
+    display: flex;
+    gap: 16px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+}
+
+/* Primary button */
+.btnPrimary {
+    background: #16a34a;
+    color: #ffffff;
+    border: none;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.25s ease, transform 0.2s ease,
+        box-shadow 0.25s ease;
+}
+
+.btnPrimary:hover {
+    background: #15803d;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(22, 163, 74, 0.35);
+}
+
+/* Outline button */
+.btnOutline {
+    background: transparent;
+    color: #16a34a;
+    border: 2px solid #16a34a;
+    padding: 12px 26px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.btnOutline:hover {
+    background: rgba(22, 163, 74, 0.1);
+}
+
+/* =========================
+   FEATURE GRID
+   ========================= */
+
+.miniGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.miniCard {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 22px 24px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    border: 1px solid #e5e7eb;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.miniCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+.miniIcon {
+    font-size: 28px;
+}
+
+.miniTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.miniText {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: #4b5563;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
+@media (max-width: 1024px) {
+    .heroContent {
+        padding: 64px 48px;
+    }
+
+    .heroTitle {
+        font-size: 38px;
+    }
+
+    .miniGrid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .heroBanner {
+        height: 440px;
+        border-radius: 16px;
+    }
+
+    .heroContent {
+        padding: 48px 32px;
+    }
+
+    .heroTitle {
+        font-size: 32px;
+    }
+
+    .heroSub {
+        font-size: 16px;
+    }
+
+    .miniGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .heroContent {
+        padding: 36px 24px;
+    }
+
+    .heroTitle {
+        font-size: 26px;
+    }
+
+    .heroActions {
+        gap: 12px;
+    }
+
+    .btnPrimary,
+    .btnOutline {
+        width: 100%;
+        justify-content: center;
+    }
+}
